@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_cart/config.dart';
 
 void main() {
-  runApp(const MyApp());
+  final config = AppConfig(appName: 'Instance B', localDbName: 'instance_b_db');
+  runApp(MyApp(config: config));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppConfig config;
+  const MyApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Text( 'Flutter Demo Home Page'),
+      home: const Text('Flutter Demo Home Page'),
     );
   }
 }
-
