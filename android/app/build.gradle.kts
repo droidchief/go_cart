@@ -38,22 +38,23 @@ android {
         }
     }
 
-    flavorDimensions "default"
+    flavorDimensions += "default"
+
     productFlavors {
-        instanceA {
-            dimension "default"
-            applicationIdSuffix ".instanceA"
-            resValue "string", "app_name", "Instance A"
+        create("instanceA") {
+            dimension = "default"
+            applicationIdSuffix = ".instanceA"
+            resValue("string", "app_name", "Instance A")
         }
-        instanceB {
-            dimension "default"
-            applicationIdSuffix ".instanceB"
-            resValue "string", "app_name", "Instance B"
+        create("instanceB") {
+            dimension = "default"
+            applicationIdSuffix = ".instanceB"
+            resValue("string", "app_name", "Instance B")
         }
-        instanceC {
-            dimension "default"
-            applicationIdSuffix ".instanceC"
-            resValue "string", "app_name", "Instance C"
+        create("instanceC") {
+            dimension = "default"
+            applicationIdSuffix = ".instanceC"
+            resValue("string", "app_name", "Instance C")
         }
     }
     

@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // These services would typically be provided by a dependency injection framework
+    //TODO: These services would typically be provided by a dependency injection framework
     final databaseService = DatabaseService(config: config);
     final connectivityService = ConnectivityService();
     final syncService = SyncService(databaseService);
