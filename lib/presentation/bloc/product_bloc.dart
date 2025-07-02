@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_cart/config.dart';
 import 'package:go_cart/data/services/database_services.dart';
@@ -8,6 +9,7 @@ import 'package:go_cart/logic/sync_service.dart';
 import 'package:go_cart/presentation/bloc/product_event.dart';
 import 'package:go_cart/presentation/bloc/product_state.dart';
 import 'package:go_cart/data/models/product.dart';
+import 'package:isar/isar.dart';
 
 
 
@@ -45,7 +47,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
       // Always listen to the COMMON database for real-time changes
       _dbSubscription?.cancel();
-      _dbSubscription = databaseService.commonDb.products.watch(fireImmediately: true).listen((products) {
+      _dbSubscription = databaseService.commonDb.products.where().watch(fireImmediately: true).listen((products) {
         add(ProductsUpdatedFromDb(products));
       });
     } catch (e) {
@@ -90,13 +92,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
            await databaseService.localDb.writeTxn(() async {
             await databaseService.localDb.products.putAll(updatedProducts);
           });
-          print("SAVED ONLINE to Common DB");
+          debugPrint("SAVED ONLINE to Common DB");
         } else {
           // OFFLINE: Save only to the local database
           await databaseService.localDb.writeTxn(() async {
             await databaseService.localDb.products.putAll(updatedProducts);
           });
-          print("SAVED OFFLINE to Local DB");
+          debugPrint("SAVED OFFLINE to Local DB");
         }
       } catch (e) {
         emit(ProductsLoadFailure(e.toString()));
@@ -109,7 +111,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         final currentState = state as ProductsLoadSuccess;
         emit(ProductsLoadSuccess(products: currentState.products, isOnline: event.isOnline));
         if (event.isOnline) {
-            // Came back online, trigger a sync
+            // Came back online? Trigger a sync
             syncService.performSync();
         }
     }
