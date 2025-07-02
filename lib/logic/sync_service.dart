@@ -15,7 +15,6 @@ class SyncService {
     final localMap = {for (var p in localProducts) p.id: p};
     final commonMap = {for (var p in commonProducts) p.id: p};
 
-    // 1. Sync from Local to Common
     for (final localProduct in localProducts) {
       final commonProduct = commonMap[localProduct.id];
       if (commonProduct == null || localProduct.lastUpdated.isAfter(commonProduct.lastUpdated)) {
@@ -26,7 +25,6 @@ class SyncService {
       }
     }
 
-    // 2. Sync from Common to Local
     for (final commonProduct in commonProducts) {
       final localProduct = localMap[commonProduct.id];
       if (localProduct == null || commonProduct.lastUpdated.isAfter(localProduct.lastUpdated)) {
