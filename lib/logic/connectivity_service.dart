@@ -1,26 +1,19 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
-import 'sync_service.dart';
+
 
 class ConnectivityService {
-  final SyncService _syncService;
-  late StreamSubscription<ConnectivityResult> _subscription;
+  final Connectivity _connectivity = Connectivity();
+  
+  Future<bool> isOnline() async {
+    final result = await _connectivity.checkConnectivity();
+    return result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
+  }
 
-  ConnectivityService(this._syncService);
-
-  void listen() {
-    _subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.mobile || result == ConnectivityResult.wifi) {
-        debugPrint("Device is back online. Starting sync...");
-        _syncService.performSync();
-      } else {
-        debugPrint("Device is offline.");
-      }
+  Stream<bool> get onConnectivityChanged {
+    return _connectivity.onConnectivityChanged.map((results) {
+        return results == ConnectivityResult.mobile || results == ConnectivityResult.wifi;
     });
   }
-
-  void dispose() {
-    _subscription.cancel();
-  }
 }
+
