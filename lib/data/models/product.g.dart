@@ -107,16 +107,17 @@ Product _productDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Product();
-  object.count = reader.readLong(offsets[0]);
-  object.id = id;
-  object.imagePath = reader.readString(offsets[1]);
-  object.lastUpdated = reader.readDateTime(offsets[2]);
-  object.mrp = reader.readDouble(offsets[3]);
-  object.name = reader.readString(offsets[4]);
-  object.packagingType = reader.readString(offsets[5]);
-  object.pp = reader.readDouble(offsets[6]);
-  object.updatedBy = reader.readString(offsets[7]);
+  final object = Product(
+    count: reader.readLongOrNull(offsets[0]) ?? 1,
+    id: id,
+    imagePath: reader.readString(offsets[1]),
+    lastUpdated: reader.readDateTime(offsets[2]),
+    mrp: reader.readDoubleOrNull(offsets[3]) ?? 0.0,
+    name: reader.readString(offsets[4]),
+    packagingType: reader.readStringOrNull(offsets[5]) ?? 'Packs',
+    pp: reader.readDoubleOrNull(offsets[6]) ?? 0.0,
+    updatedBy: reader.readString(offsets[7]),
+  );
   return object;
 }
 
@@ -128,19 +129,19 @@ P _productDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 1) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
       return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? 'Packs') as P;
     case 6:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset) ?? 0.0) as P;
     case 7:
       return (reader.readString(offset)) as P;
     default:
