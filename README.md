@@ -36,19 +36,27 @@ flutter run --flavor instanceC -t lib/main_c.dart
 ### Instance A
 
 ```bash
-flutter build apk --flavor instanceA -t lib/main_a.dart -o build/instanceA
+flutter build apk --flavor instanceA -t lib/main_a.dart 
 ```
 
 ### Instance B
 
 ```bash
-flutter build apk --flavor instanceB -t lib/main_b.dart -o build/instanceB
+flutter build apk --flavor instanceB -t lib/main_b.dart 
 ```
 
 ### Instance C
 
 ```bash
-flutter build apk --flavor instanceC -t lib/main_c.dart -o build/instanceC
+flutter build apk --flavor instanceC -t lib/main_c.dart 
+```
+
+---
+
+## 🛠 Windows Executable 
+
+```bash
+flutter build windows -t lib/main_a.dart
 ```
 
 ---
