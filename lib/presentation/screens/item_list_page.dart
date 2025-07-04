@@ -65,9 +65,10 @@ class ItemListPage extends StatelessWidget {
           final total = state.products.fold<double>(
               0.0, (sum, item) => sum + (item.pp * item.count));
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 30),
             decoration: BoxDecoration(
               color: Colors.blue.shade800,
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -100,7 +101,7 @@ class ItemListPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.blue.shade800,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   child: const Text('Save'),

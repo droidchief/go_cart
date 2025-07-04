@@ -6,13 +6,13 @@ part 'product.g.dart';
 class Product {
   Id id = Isar.autoIncrement;
   late String name;
-  late String imagePath;
+  late String imagePath; 
   late int count;
-  late String packagingType; 
-  late double mrp; 
-  late double pp;  
+  late String packagingType;
+  late double mrp;
+  late double pp;
   late DateTime lastUpdated;
-  late String updatedBy; 
+  late String updatedBy;
 
   Product({
     this.id = Isar.autoIncrement,
@@ -31,13 +31,14 @@ class Product {
     String? packagingType,
     double? mrp,
     double? pp,
+    String? imagePath,
     DateTime? lastUpdated,
     String? updatedBy,
   }) {
     return Product(
       id: this.id,
       name: this.name,
-      imagePath: this.imagePath,
+      imagePath: imagePath ?? this.imagePath,
       count: count ?? this.count,
       packagingType: packagingType ?? this.packagingType,
       mrp: mrp ?? this.mrp,
@@ -46,5 +47,4 @@ class Product {
       updatedBy: updatedBy ?? this.updatedBy,
     );
   }
-
 }

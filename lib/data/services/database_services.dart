@@ -15,6 +15,7 @@ class DatabaseService {
 
   Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
+    await Isar.initializeIsarCore(download: true); // Needed for some platforms
     _localDb = await Isar.open([ProductSchema], directory: dir.path, name: config.localDbName);
     _commonDb = await Isar.open([ProductSchema], directory: dir.path, name: 'common_db');
     await _seedInitialData();
