@@ -1,17 +1,17 @@
-name: Build Windows Flutter Flavors
+name: Build Windows EXEs for main_a and main_b
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-  workflow_dispatch: 
 
 jobs:
   build:
+    name: Build EXE on Windows
     runs-on: windows-latest
-    name: Build Windows .exe for main_a and main_b
 
     steps:
-      - name: Checkout source
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up Flutter
@@ -25,20 +25,25 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build flavor A
-        run: flutter build windows --flavor instanceA -t lib/main_a.dart
+      - name: Build main_a
+        run: flutter build windows -t lib/main_a.dart
 
-      - name: Build flavor B
-        run: flutter build windows --flavor instanceB -t lib/main_b.dart
+      - name: Rename main_a.exe
+        run: |
+          mkdir artifacts
+          copy build\windows\runner\Release\go_cart.exe artifacts\main_a.exe
 
-      - name: Upload main_a.exe
+      - name: Clean and build main_b
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build windows -t lib/main_b.dart
+
+      - name: Rename main_b.exe
+        run: copy build\windows\runner\Release\go_cart.exe artifacts\main_b.exe
+
+      - name: Upload both .exe files
         uses: actions/upload-artifact@v4
         with:
-          name: main_a_exe
-          path: build/windows/instanceA/runner/Release/*.exe
-
-      - name: Upload main_b.exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: main_b_exe
-          path: build/windows/instanceB/runner/Release/*.exe
+          name: windows_exes
+          path: artifacts/*.exe
