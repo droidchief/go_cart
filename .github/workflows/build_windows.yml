@@ -1,0 +1,44 @@
+name: Build Windows Flutter Flavors
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: windows-latest
+    name: Build Windows .exe for main_a and main_b
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build flavor A
+        run: flutter build windows --flavor instanceA -t lib/main_a.dart
+
+      - name: Build flavor B
+        run: flutter build windows --flavor instanceB -t lib/main_b.dart
+
+      - name: Upload main_a.exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: main_a_exe
+          path: build/windows/instanceA/runner/Release/*.exe
+
+      - name: Upload main_b.exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: main_b_exe
+          path: build/windows/instanceB/runner/Release/*.exe
