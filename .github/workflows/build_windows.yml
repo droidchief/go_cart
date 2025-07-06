@@ -31,7 +31,7 @@ jobs:
       - name: Rename main_a.exe
         run: |
           mkdir artifacts
-          copy build\windows\runner\Release\go_cart.exe artifacts\main_a.exe
+          copy build\windows\x64\runner\Release\go_cart.exe artifacts\main_a.exe
 
       - name: Clean and build main_b
         run: |
@@ -40,7 +40,7 @@ jobs:
           flutter build windows -t lib/main_b.dart
 
       - name: Rename main_b.exe
-        run: copy build\windows\runner\Release\go_cart.exe artifacts\main_b.exe
+        run: copy build\windows\x64\runner\Release\go_cart.exe artifacts\main_b.exe
 
       - name: Upload both .exe files
         uses: actions/upload-artifact@v4
