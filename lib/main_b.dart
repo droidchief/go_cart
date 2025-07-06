@@ -7,9 +7,8 @@ Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   await Isar.initializeIsarCore(download: true);
-  
+
   final config = AppConfig(appName: 'Instance B', localDbName: 'instance_b_db');
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp(config: config));
 }
 

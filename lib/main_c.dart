@@ -9,6 +9,5 @@ Future<void> main() async {
   await Isar.initializeIsarCore(download: true);
   
   final config = AppConfig(appName: 'Instance C', localDbName: 'instance_c_db');
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp(config: config));
 }
