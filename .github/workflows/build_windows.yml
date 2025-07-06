@@ -32,13 +32,13 @@ jobs:
         run: flutter build windows --flavor instanceB -t lib/main_b.dart
 
       - name: Upload main_a.exe
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: main_a_exe
           path: build/windows/instanceA/runner/Release/*.exe
 
       - name: Upload main_b.exe
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: main_b_exe
           path: build/windows/instanceB/runner/Release/*.exe
