@@ -42,8 +42,8 @@ jobs:
       - name: Rename main_b.exe
         run: copy build\windows\x64\runner\Release\go_cart.exe artifacts\main_b.exe
 
-      - name: Upload both .exe files
+      - name: Upload full build folders
         uses: actions/upload-artifact@v4
         with:
-          name: windows_exes
-          path: artifacts/*.exe
+          name: windows_exe_full_builds
+          path: build/windows/x64/runner/Release/**
