@@ -1,0 +1,41 @@
+The Project contains following list of tasks.
+1. Make 3 distinct mobile apps with the same screen and UI/UX as in the picture
+above and name them Instance A, Instance B, Instance C and provide separate APK
+for each of these.
+2. In each of these apps, as can be on the screen above, the following data should be
+editable.
+a. Count of each of the product instances
+b. the type of packaging for the product
+c. the MRP value (per piece sales price)
+d. the PP value (per piece purchase price)
+e. Picture of medicine packet
+3. The change in purchase price for each medicine will change the individual Sub Total
+and consequently, the Total at the bottom.
+4. Users can save the change by pressing save button.
+5. Even though all 3 apps are supposed to be distinct and they should have their own
+database, when the phone is connected to the internet, all 3 apps should work
+with a common database (and update the app-specific database based on this
+common database). However, this common database should be located within the
+same phone as the apps. This is to avoid additional effort for having a separate
+database outside the phone. The idea is to test the offline-online data syncing
+concept here. Nonetheless, having this common database means, changing from
+one app, which also reflects on the other app, when the phone is connected to the
+internet.
+6. However, if the phone is set offline, the individual app will only save its changes in its
+own database. When the phone is set back online, the common database should be
+updated, and all three phones should have the same data.
+7. When syncing the changes into the common database from each app database,
+after the phone is back online, it should be done based on the timestamp of the
+change that took place in each individual app, when the phone was offline.
+8. Additionally, a windows executable of the app should also be provided, so that it
+can easily be installed and played on a windows OS. The target for the task is to
+check some minimum experience in windows. As we don’t have a real database for
+this task, it would be very difficult for the windows app instance to access the data
+from the common database on the phone. That’s why we would only like to see a
+theoretical proposal (architecture or software design) about how to handle data
+syncing for the windows app instance, in the most efficient manner. However, it
+would be very impressive if you could also set up a database which can easily be
+accessed both from phone and windows, and make the windows instance capable
+of both pushing and pulling the changes to the online database.
+9. Please also provide the code of this app. Please document the code so that one can
+easily understand most of the logic.

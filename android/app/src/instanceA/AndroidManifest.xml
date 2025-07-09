@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Only instanceA hosts the ContentProvider -->
+        <provider
+            android:name="com.example.go_cart.SharedDatabaseProvider"
+            android:authorities="com.example.go_cart.shared.database"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="com.example.go_cart.SHARED_DATABASE_PERMISSION" />
+    </application>
+    
+    <permission
+        android:name="com.example.go_cart.SHARED_DATABASE_PERMISSION"
+        android:protectionLevel="signature" />
+</manifest>

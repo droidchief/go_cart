@@ -1,19 +1,261 @@
+import 'package:equatable/equatable.dart';
 import 'package:go_cart/data/models/product.dart';
 
-abstract class ProductState {
+/// Base class for all product-related states
+/// Represents the current state of products in the application
+abstract class ProductState extends Equatable {
+  const ProductState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// Initial state when ProductBloc is first created
+class ProductInitial extends ProductState {
+  const ProductInitial();
+
+  @override
+  String toString() => 'ProductInitial';
+}
+
+/// State when products are being loaded from database
+class ProductLoading extends ProductState {
+  final String message; 
+  final double? progress; 
+
+  const ProductLoading({
+    this.message = 'Loading products...',
+    this.progress,
+  });
+
+  @override
+  List<Object?> get props => [message, progress];
+
+  @override
+  String toString() => 'ProductLoading { message: $message, progress: $progress }';
+}
+
+/// State when products have been successfully loaded
+class ProductLoadSuccess extends ProductState {
   final List<Product> products;
+  final DateTime lastUpdated; 
+  final String instanceId; 
+  final bool hasPendingChanges; 
+  final double totalAmount; 
+  final Map<String, dynamic> syncStatus; 
+
+  const ProductLoadSuccess({
+    required this.products,
+    required this.lastUpdated,
+    required this.instanceId,
+    this.hasPendingChanges = false,
+    required this.totalAmount,
+    this.syncStatus = const {},
+  });
+
+  static double calculateTotal(List<Product> products) {
+    return products
+        .where((product) => !product.isDeleted)
+        .fold(0.0, (sum, product) => sum + (product.pp * product.count));
+  }
+
+  /// Create a copy with updated values
+  ProductLoadSuccess copyWith({
+    List<Product>? products,
+    DateTime? lastUpdated,
+    String? instanceId,
+    bool? hasPendingChanges,
+    double? totalAmount,
+    Map<String, dynamic>? syncStatus,
+  }) {
+    final updatedProducts = products ?? this.products;
+    return ProductLoadSuccess(
+      products: updatedProducts,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      instanceId: instanceId ?? this.instanceId,
+      hasPendingChanges: hasPendingChanges ?? this.hasPendingChanges,
+      totalAmount: totalAmount ?? calculateTotal(updatedProducts),
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  List<Object?> get props => [products, lastUpdated, instanceId, hasPendingChanges, totalAmount, syncStatus];
+
+  @override
+  String toString() => 'ProductLoadSuccess { count: ${products.length}, total: \$${totalAmount.toStringAsFixed(2)}, pending: $hasPendingChanges, instance: $instanceId }';
+}
+
+/// State when there's an error loading or managing products
+class ProductError extends ProductState {
+  final String message; 
+  final String? details; 
+  final String errorCode; 
+  final bool isRecoverable; // Whether user can retry
+  final DateTime timestamp; 
+  final List<Product>? lastKnownProducts; // Fallback data if available
+
+  const ProductError({
+    required this.message,
+    this.details,
+    required this.errorCode,
+    this.isRecoverable = true,
+    required this.timestamp,
+    this.lastKnownProducts,
+  });
+
+  @override
+  List<Object?> get props => [message, details, errorCode, isRecoverable, timestamp, lastKnownProducts];
+
+  @override
+  String toString() => 'ProductError { message: $message, code: $errorCode, recoverable: $isRecoverable, timestamp: $timestamp }';
+}
+
+/// State when products are being saved to database
+class ProductSaving extends ProductState {
+  final List<Product> products; 
+  final String operation; 
+  final double? progress; 
+  final bool isSyncingToShared; 
+
+  const ProductSaving({
+    required this.products,
+    this.operation = 'Saving products...',
+    this.progress,
+    this.isSyncingToShared = false,
+  });
+
+  @override
+  List<Object?> get props => [products, operation, progress, isSyncingToShared];
+
+  @override
+  String toString() => 'ProductSaving { count: ${products.length}, operation: $operation, syncingShared: $isSyncingToShared }';
+}
+
+/// State when products have been successfully saved
+class ProductSaveSuccess extends ProductState {
+  final List<Product> products;
+  final DateTime savedAt;
+  final String instanceId;
+  final bool syncedToShared; 
+  final String message; 
+
+  const ProductSaveSuccess({
+    required this.products,
+    required this.savedAt,
+    required this.instanceId,
+    this.syncedToShared = false,
+    this.message = 'Products saved successfully',
+  });
+
+  @override
+  List<Object?> get props => [products, savedAt, instanceId, syncedToShared, message];
+
+  @override
+  String toString() => 'ProductSaveSuccess { count: ${products.length}, synced: $syncedToShared, instance: $instanceId }';
+}
+
+/// State when synchronization with shared database is in progress
+class ProductSyncing extends ProductState {
+  final String operation; 
+  final String? sourceInstance; 
+  final double? progress; 
+  final List<Product> currentProducts; 
+
+  const ProductSyncing({
+    required this.operation,
+    this.sourceInstance,
+    this.progress,
+    required this.currentProducts,
+  });
+
+  @override
+  List<Object?> get props => [operation, sourceInstance, progress, currentProducts];
+
+  @override
+  String toString() => 'ProductSyncing { operation: $operation, source: $sourceInstance, progress: $progress }';
+}
+
+/// State when synchronization has completed successfully
+class ProductSyncSuccess extends ProductState {
+  final List<Product> products; 
+  final DateTime syncedAt;
+  final String instanceId;
+  final int itemsSynced; 
+  final String message; 
+  final Map<String, dynamic> syncDetails; // Detailed sync information
+
+  const ProductSyncSuccess({
+    required this.products,
+    required this.syncedAt,
+    required this.instanceId,
+    required this.itemsSynced,
+    this.message = 'Sync completed successfully',
+    this.syncDetails = const {},
+  });
+
+  @override
+  List<Object?> get props => [products, syncedAt, instanceId, itemsSynced, message, syncDetails];
+
+  @override
+  String toString() => 'ProductSyncSuccess { count: ${products.length}, synced: $itemsSynced, instance: $instanceId }';
+}
+
+/// State when validation is being performed on products
+class ProductValidating extends ProductState {
+  final List<Product> products;
+  final String validationType; 
+  final double? progress; 
+
+  const ProductValidating({
+    required this.products,
+    required this.validationType,
+    this.progress,
+  });
+
+  @override
+  List<Object?> get props => [products, validationType, progress];
+
+  @override
+  String toString() => 'ProductValidating { count: ${products.length}, type: $validationType }';
+}
+
+/// State when product validation has failed
+class ProductValidationError extends ProductState {
+  final List<Product> products;
+  final Map<int, List<String>> validationErrors; 
+  final String generalError; 
+
+  const ProductValidationError({
+    required this.products,
+    required this.validationErrors,
+    required this.generalError,
+  });
+
+  @override
+  List<Object?> get props => [products, validationErrors, generalError];
+
+  @override
+  String toString() => 'ProductValidationError { count: ${products.length}, errors: ${validationErrors.length} }';
+}
+
+/// State when connectivity status changes
+class ProductConnectivityChanged extends ProductState {
   final bool isOnline;
-  ProductState({this.products = const [], this.isOnline = true});
-}
+  final DateTime timestamp;
+  final List<Product> products;
+  final bool hasPendingSync; 
 
-class ProductsLoadInProgress extends ProductState {}
+  const ProductConnectivityChanged({
+    required this.isOnline,
+    required this.timestamp,
+    required this.products,
+    this.hasPendingSync = false,
+  });
 
-class ProductsLoadSuccess extends ProductState {
-  ProductsLoadSuccess({required List<Product> products, required bool isOnline}) 
-  : super(products: products, isOnline: isOnline);
-}
+  @override
+  List<Object?> get props => [isOnline, timestamp, products, hasPendingSync];
 
-class ProductsLoadFailure extends ProductState {
-  final String error;
-  ProductsLoadFailure(this.error);
+  @override
+  String toString() => 'ProductConnectivityChanged { online: $isOnline, pending: $hasPendingSync }';
 }

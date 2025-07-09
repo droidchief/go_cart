@@ -38,23 +38,23 @@ android {
         }
     }
 
-    flavorDimensions += "default"
+    flavorDimensions += "version"
 
     productFlavors {
         create("instanceA") {
-            dimension = "default"
+            dimension = "version"
             applicationIdSuffix = ".instanceA"
-            resValue("string", "app_name", "Instance A")
+            resValue("string", "app_name", "Go Cart - Instance A")
         }
         create("instanceB") {
-            dimension = "default"
+            dimension = "version"
             applicationIdSuffix = ".instanceB"
-            resValue("string", "app_name", "Instance B")
+            resValue("string", "app_name", "Go Cart - Instance B")
         }
         create("instanceC") {
-            dimension = "default"
+            dimension = "version"
             applicationIdSuffix = ".instanceC"
-            resValue("string", "app_name", "Instance C")
+            resValue("string", "app_name", "Go Cart - Instance B")
         }
     }
     
