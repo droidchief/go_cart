@@ -31,7 +31,7 @@ class SharedProduct {
 
   factory SharedProduct.fromMap(Map<String, dynamic> map) {
     return SharedProduct(
-      id: map['id'] as String,
+      id: map['id']?.toString() ?? '', // Handle both String and int IDs
       name: map['name'] as String,
       imagePath: map['image_path'] as String? ?? '',
       count: map['count'] as int,
@@ -62,8 +62,9 @@ class SharedProduct {
   }
 
   /// Convert to local Isar Product
-  Product toIsarProduct() {
+ Product toIsarProduct() {
     return Product(
+      sharedId: id, // Use the shared ID directly
       name: name,
       imagePath: imagePath,
       count: count,
@@ -79,7 +80,7 @@ class SharedProduct {
 
   factory SharedProduct.fromIsarProduct(Product product) {
     return SharedProduct(
-      id: product.id.toString(),
+      id: product.sharedId,
       name: product.name,
       imagePath: product.imagePath,
       count: product.count,
@@ -123,15 +124,18 @@ class SharedProduct {
 
   @override
   String toString() {
-    return 'SharedProduct(id: $id, name: $name, count: $count, updatedBy: $updatedBy, version: $version, isDeleted: $isDeleted)';
+    return 'SharedProduct(id: $id, name: $name, count: $count, packagingType: $packagingType, mrp: ₹${mrp.toStringAsFixed(2)}, pp: ₹${pp.toStringAsFixed(2)}, updatedBy: $updatedBy, version: $version, isDeleted: $isDeleted)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is SharedProduct && other.id == id && other.version == version;
+    return other is SharedProduct && 
+           other.id == id && 
+           other.version == version &&
+           other.lastUpdated == lastUpdated;
   }
 
   @override
-  int get hashCode => id.hashCode ^ version.hashCode;
+  int get hashCode => id.hashCode ^ version.hashCode ^ lastUpdated.hashCode;
 }

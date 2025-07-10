@@ -77,6 +77,16 @@ class SaveProducts extends ProductEvent {
   String toString() => 'SaveProducts { count: ${products.length}, forceSync: $forceSyncToShared }';
 }
 
+// For saving products (triggered by "Save Changes" button)
+class SaveProduct extends ProductEvent {
+  final Product product;
+  
+  const SaveProduct({required this.product});
+  
+  @override
+  List<Object> get props => [product];
+}
+
 /// Event to delete a product
 /// Triggered when user deletes a product (soft delete)
 class DeleteProduct extends ProductEvent {
@@ -193,4 +203,12 @@ class ValidateProducts extends ProductEvent {
 
   @override
   String toString() => 'ValidateProducts { count: ${products.length} }';
+}
+
+/// Event to print debug logs
+class PrintDebugLogs extends ProductEvent {
+  const PrintDebugLogs();
+  
+  @override
+  List<Object> get props => [];
 }

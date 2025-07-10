@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_cart/data/models/product.dart';
@@ -19,14 +22,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Product> _currentProducts = [];
+    List<Product> _liveProducts = []; 
   bool _hasPendingChanges = false;
-  
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
-    // Load products when screen initializes
     context.read<ProductBloc>().add(const LoadProducts());
   }
 
@@ -38,11 +40,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Handle app lifecycle changes for sync
     if (state == AppLifecycleState.resumed) {
-      // App came to foreground, check for updates
-      context.read<ProductBloc>().add(const SyncWithSharedDatabase(isManualSync: false));
+      debugPrint('HOME_SCREEN: App resumed, forcing refresh...');
+
+      // First reload local data
+      context.read<ProductBloc>().add(const LoadProducts());
+
+      // Then sync with shared database after a delay
+      Timer(const Duration(seconds: 1), () {
+        context.read<ProductBloc>().add(
+          const SyncWithSharedDatabase(isManualSync: false),
+        );
+      });
     }
+  }
+
+    void _onProductSubtotalChanged(Product updatedProduct) {
+    setState(() {
+      final index = _liveProducts.indexWhere((p) => p.id == updatedProduct.id);
+      if (index != -1) {
+        _liveProducts[index] = updatedProduct;
+      }
+    });
+  }
+
+  // Calculate live total from _liveProducts
+  double _calculateLiveTotal() {
+    return _liveProducts.fold(0.0, (sum, product) => sum + (product.count * product.pp));
   }
 
   @override
@@ -52,23 +76,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: BlocBuilder<ProductBloc, ProductState>(
           builder: (context, state) {
             final instanceId = context.read<ProductBloc>().instanceId;
-            return Text('Go Cart - ${instanceId.toUpperCase()}');
+            return Text('GOCart - ${instanceId.toUpperCase()}');
           },
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          if (kDebugMode)
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              onPressed: () {
+                context.read<ProductBloc>().add(const PrintDebugLogs());
+              },
+              tooltip: 'Print Debug Logs',
+            ),
           // Sync status indicator
           const SyncStatusIndicator(),
-          // Manual sync button
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<ProductBloc>().add(
-                const SyncWithSharedDatabase(isManualSync: true),
-              );
-            },
-            tooltip: 'Manual Sync',
-          ),
+       
         ],
       ),
       body: BlocConsumer<ProductBloc, ProductState>(
@@ -77,33 +100,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if (state is ProductError) {
             _showErrorSnackBar(context, state);
           } else if (state is ProductSaveSuccess) {
-            _showSuccessSnackBar(context, 'Data saved and synced to shared file');
+            _showSuccessSnackBar(
+              context,
+              'Data saved and synced to shared file',
+            );
           } else if (state is ProductSyncSuccess) {
             _showSuccessSnackBar(context, 'Sync completed successfully');
           }
-          
-          // Update local state
+
+          // Update both current and live products
           if (state is ProductLoadSuccess) {
             _currentProducts = state.products;
+            _liveProducts = List.from(state.products); 
             _hasPendingChanges = state.hasPendingChanges;
           }
         },
         builder: (context, state) {
           return Column(
             children: [
-              // Status bar showing current state
               _buildStatusBar(state),
-              
-              // Product list
-              Expanded(
-                child: _buildProductList(state),
-              ),
-              
-              // Total section
+
+              Expanded(child: _buildProductList(state)),
+
               _buildTotalSection(state),
-              
-              // Save button
-              _buildSaveButton(state),
+
             ],
           );
         },
@@ -139,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       statusIcon = Icons.edit;
     } else if (state is ProductLoadSuccess) {
       backgroundColor = Colors.green.shade100;
-      statusText = 'All changes saved • Last updated: ${_formatTime(state.lastUpdated)}';
+      statusText =
+          'All changes saved • Last updated: ${_formatTime(state.lastUpdated)}';
       statusIcon = Icons.check_circle;
     } else {
       return const SizedBox.shrink();
@@ -154,12 +175,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Icon(statusIcon, size: 16),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              statusText,
-              style: const TextStyle(fontSize: 12),
-            ),
+            child: Text(statusText, style: const TextStyle(fontSize: 12)),
           ),
-          if (state is ProductSyncing || state is ProductSaving || state is ProductLoading)
+          if (state is ProductSyncing ||
+              state is ProductSaving ||
+              state is ProductLoading)
             const SizedBox(
               width: 16,
               height: 16,
@@ -231,135 +251,65 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final product = _currentProducts[index];
         return ProductCard(
           product: product,
-          onProductChanged: (updatedProduct, fieldName, oldValue, newValue) {
-            context.read<ProductBloc>().add(UpdateProduct(
-              product: updatedProduct,
-              fieldName: fieldName,
-              oldValue: oldValue,
-              newValue: newValue,
-            ));
+          onProductSaved: (updatedProduct) {
+            context.read<ProductBloc>().add(
+              SaveProduct(product: updatedProduct),
+            );
           },
           onProductDeleted: (productId) {
-            context.read<ProductBloc>().add(DeleteProduct(
-              productId: productId,
-              reason: 'User deletion',
-            ));
+            context.read<ProductBloc>().add(
+              DeleteProduct(productId: productId, reason: 'User deletion'),
+            );
           },
+          onSubtotalChanged: _onProductSubtotalChanged, 
+
         );
       },
     );
   }
 
   Widget _buildTotalSection(ProductState state) {
-    double totalAmount = 0.0;
-    
-    if (state is ProductLoadSuccess) {
-      totalAmount = state.totalAmount;
-    } else if (_currentProducts.isNotEmpty) {
-      totalAmount = ProductLoadSuccess.calculateTotal(_currentProducts);
-    }
+     final liveTotal = _calculateLiveTotal();
+    final itemCount = _liveProducts.length;
 
     return TotalSection(
-      totalAmount: totalAmount,
-      itemCount: _currentProducts.length,
+      totalAmount: liveTotal,
+      itemCount: itemCount,
     );
   }
 
-  Widget _buildSaveButton(ProductState state) {
-    final isLoading = state is ProductSaving || state is ProductSyncing;
-    final hasChanges = _hasPendingChanges;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      child: ElevatedButton(
-        onPressed: (isLoading || !hasChanges) ? null : () {
-          // Validate before saving
-          context.read<ProductBloc>().add(ValidateProducts(
-            products: _currentProducts,
-          ));
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: hasChanges ? Colors.blue : Colors.grey,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isLoading) ...[
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              isLoading ? 'Saving...' : (hasChanges ? 'Save Changes' : 'No Changes'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget? _buildFloatingActionButton() {
-    return FloatingActionButton(
+Widget? _buildFloatingActionButton() {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 80), // ✅ Add space at bottom
+    child: FloatingActionButton(
       onPressed: () {
-        _showAddProductDialog();
+        context.read<ProductBloc>().add(
+          const SyncWithSharedDatabase(isManualSync: true),
+        );
       },
-      tooltip: 'Add Product',
-      child: const Icon(Icons.add),
-    );
-  }
+      tooltip: 'Manual Sync',
+      child: const Icon(Icons.refresh),
+    ),
+  );
+}
 
-  void _showAddProductDialog() {
-    // This would show a dialog to add a new product
-    // Implementation depends on your specific requirements
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Product'),
-        content: const Text('Add product functionality would go here'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              // Add new product logic
-              Navigator.of(context).pop();
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
+ 
   void _showErrorSnackBar(BuildContext context, ProductError state) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(state.message),
         backgroundColor: Colors.red,
-        action: state.isRecoverable
-            ? SnackBarAction(
-                label: 'Retry',
-                textColor: Colors.white,
-                onPressed: () {
-                  context.read<ProductBloc>().add(const LoadProducts());
-                },
-              )
-            : null,
+        action:
+            state.isRecoverable
+                ? SnackBarAction(
+                  label: 'Retry',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    context.read<ProductBloc>().add(const LoadProducts());
+                  },
+                )
+                : null,
       ),
     );
   }

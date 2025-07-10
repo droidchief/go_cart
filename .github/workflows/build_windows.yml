@@ -1,4 +1,4 @@
-name: Build Windows EXEs for main_a and main_b
+name: Build Multiple Windows App Instances
 
 on:
   workflow_dispatch:
@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    name: Build EXE on Windows
     runs-on: windows-latest
 
     steps:
@@ -22,28 +21,34 @@ jobs:
       - name: Enable Windows Desktop
         run: flutter config --enable-windows-desktop
 
-      - name: Get dependencies
+      - name: Get Dependencies
         run: flutter pub get
 
+      # Build Instance A
       - name: Build main_a
         run: flutter build windows -t lib/main_a.dart
 
-      - name: Rename main_a.exe
+      - name: Copy Instance A Build Folder
         run: |
-          mkdir artifacts
-          copy build\windows\x64\runner\Release\go_cart.exe artifacts\main_a.exe
+          mkdir builds
+          xcopy /E /I /Y build\windows\x64\runner\Release builds\instance_a
 
-      - name: Clean and build main_b
-        run: |
-          flutter clean
-          flutter pub get
-          flutter build windows -t lib/main_b.dart
+      # Build Instance B
+      - name: Build main_b
+        run: flutter build windows -t lib/main_b.dart
 
-      - name: Rename main_b.exe
-        run: copy build\windows\x64\runner\Release\go_cart.exe artifacts\main_b.exe
+      - name: Copy Instance B Build Folder
+        run: xcopy /E /I /Y build\windows\x64\runner\Release builds\instance_b
 
-      - name: Upload full build folders
+      # Build Instance C
+      # - name: Build main_c
+      #   run: flutter build windows -t lib/main_c.dart
+      #
+      # - name: Copy Instance C Build Folder
+      #   run: xcopy /E /I /Y build\windows\x64\runner\Release builds\instance_c
+
+      - name: Upload All App Instances
         uses: actions/upload-artifact@v4
         with:
-          name: windows_exe_full_builds
-          path: build/windows/x64/runner/Release/**
+          name: go_cart_windows_instances
+          path: builds/

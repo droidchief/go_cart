@@ -62,18 +62,23 @@ const ProductSchema = CollectionSchema(
       name: r'pp',
       type: IsarType.double,
     ),
-    r'subTotal': PropertySchema(
+    r'sharedId': PropertySchema(
       id: 9,
+      name: r'sharedId',
+      type: IsarType.string,
+    ),
+    r'subTotal': PropertySchema(
+      id: 10,
       name: r'subTotal',
       type: IsarType.double,
     ),
     r'updatedBy': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'updatedBy',
       type: IsarType.string,
     ),
     r'version': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'version',
       type: IsarType.long,
     )
@@ -83,7 +88,21 @@ const ProductSchema = CollectionSchema(
   deserialize: _productDeserialize,
   deserializeProp: _productDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'sharedId': IndexSchema(
+      id: 2278061889287938782,
+      name: r'sharedId',
+      unique: true,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'sharedId',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _productGetId,
@@ -101,6 +120,7 @@ int _productEstimateSize(
   bytesCount += 3 + object.imagePath.length * 3;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.packagingType.length * 3;
+  bytesCount += 3 + object.sharedId.length * 3;
   bytesCount += 3 + object.updatedBy.length * 3;
   return bytesCount;
 }
@@ -120,9 +140,10 @@ void _productSerialize(
   writer.writeString(offsets[6], object.name);
   writer.writeString(offsets[7], object.packagingType);
   writer.writeDouble(offsets[8], object.pp);
-  writer.writeDouble(offsets[9], object.subTotal);
-  writer.writeString(offsets[10], object.updatedBy);
-  writer.writeLong(offsets[11], object.version);
+  writer.writeString(offsets[9], object.sharedId);
+  writer.writeDouble(offsets[10], object.subTotal);
+  writer.writeString(offsets[11], object.updatedBy);
+  writer.writeLong(offsets[12], object.version);
 }
 
 Product _productDeserialize(
@@ -133,7 +154,6 @@ Product _productDeserialize(
 ) {
   final object = Product(
     count: reader.readLong(offsets[0]),
-    id: id,
     imagePath: reader.readString(offsets[2]),
     isDeleted: reader.readBoolOrNull(offsets[3]) ?? false,
     lastUpdated: reader.readDateTime(offsets[4]),
@@ -141,9 +161,11 @@ Product _productDeserialize(
     name: reader.readString(offsets[6]),
     packagingType: reader.readString(offsets[7]),
     pp: reader.readDouble(offsets[8]),
-    updatedBy: reader.readString(offsets[10]),
-    version: reader.readLong(offsets[11]),
+    sharedId: reader.readString(offsets[9]),
+    updatedBy: reader.readString(offsets[11]),
+    version: reader.readLong(offsets[12]),
   );
+  object.id = id;
   return object;
 }
 
@@ -173,10 +195,12 @@ P _productDeserializeProp<P>(
     case 8:
       return (reader.readDouble(offset)) as P;
     case 9:
-      return (reader.readDouble(offset)) as P;
-    case 10:
       return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readDouble(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -193,6 +217,61 @@ List<IsarLinkBase<dynamic>> _productGetLinks(Product object) {
 
 void _productAttach(IsarCollection<dynamic> col, Id id, Product object) {
   object.id = id;
+}
+
+extension ProductByIndex on IsarCollection<Product> {
+  Future<Product?> getBySharedId(String sharedId) {
+    return getByIndex(r'sharedId', [sharedId]);
+  }
+
+  Product? getBySharedIdSync(String sharedId) {
+    return getByIndexSync(r'sharedId', [sharedId]);
+  }
+
+  Future<bool> deleteBySharedId(String sharedId) {
+    return deleteByIndex(r'sharedId', [sharedId]);
+  }
+
+  bool deleteBySharedIdSync(String sharedId) {
+    return deleteByIndexSync(r'sharedId', [sharedId]);
+  }
+
+  Future<List<Product?>> getAllBySharedId(List<String> sharedIdValues) {
+    final values = sharedIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'sharedId', values);
+  }
+
+  List<Product?> getAllBySharedIdSync(List<String> sharedIdValues) {
+    final values = sharedIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'sharedId', values);
+  }
+
+  Future<int> deleteAllBySharedId(List<String> sharedIdValues) {
+    final values = sharedIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'sharedId', values);
+  }
+
+  int deleteAllBySharedIdSync(List<String> sharedIdValues) {
+    final values = sharedIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'sharedId', values);
+  }
+
+  Future<Id> putBySharedId(Product object) {
+    return putByIndex(r'sharedId', object);
+  }
+
+  Id putBySharedIdSync(Product object, {bool saveLinks = true}) {
+    return putByIndexSync(r'sharedId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllBySharedId(List<Product> objects) {
+    return putAllByIndex(r'sharedId', objects);
+  }
+
+  List<Id> putAllBySharedIdSync(List<Product> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'sharedId', objects, saveLinks: saveLinks);
+  }
 }
 
 extension ProductQueryWhereSort on QueryBuilder<Product, Product, QWhere> {
@@ -266,6 +345,51 @@ extension ProductQueryWhere on QueryBuilder<Product, Product, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterWhereClause> sharedIdEqualTo(
+      String sharedId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'sharedId',
+        value: [sharedId],
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterWhereClause> sharedIdNotEqualTo(
+      String sharedId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'sharedId',
+              lower: [],
+              upper: [sharedId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'sharedId',
+              lower: [sharedId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'sharedId',
+              lower: [sharedId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'sharedId',
+              lower: [],
+              upper: [sharedId],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -1009,6 +1133,136 @@ extension ProductQueryFilter
     });
   }
 
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sharedId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'sharedId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'sharedId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sharedId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterFilterCondition> sharedIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'sharedId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Product, Product, QAfterFilterCondition> subTotalEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1370,6 +1624,18 @@ extension ProductQuerySortBy on QueryBuilder<Product, Product, QSortBy> {
     });
   }
 
+  QueryBuilder<Product, Product, QAfterSortBy> sortBySharedId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sharedId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterSortBy> sortBySharedIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sharedId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Product, Product, QAfterSortBy> sortBySubTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'subTotal', Sort.asc);
@@ -1529,6 +1795,18 @@ extension ProductQuerySortThenBy
     });
   }
 
+  QueryBuilder<Product, Product, QAfterSortBy> thenBySharedId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sharedId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Product, Product, QAfterSortBy> thenBySharedIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sharedId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Product, Product, QAfterSortBy> thenBySubTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'subTotal', Sort.asc);
@@ -1626,6 +1904,13 @@ extension ProductQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Product, Product, QDistinct> distinctBySharedId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sharedId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Product, Product, QDistinct> distinctBySubTotal() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'subTotal');
@@ -1705,6 +1990,12 @@ extension ProductQueryProperty
   QueryBuilder<Product, double, QQueryOperations> ppProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pp');
+    });
+  }
+
+  QueryBuilder<Product, String, QQueryOperations> sharedIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sharedId');
     });
   }
 

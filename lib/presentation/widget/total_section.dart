@@ -14,7 +14,7 @@ class TotalSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, top: 16, right: 16, bottom: 30),
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
         border: Border(
@@ -47,7 +47,7 @@ class TotalSection extends StatelessWidget {
             ],
           ),
           Text(
-            '\$${totalAmount.toStringAsFixed(2)}',
+            '\₹${totalAmount.toStringAsFixed(2)}',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
