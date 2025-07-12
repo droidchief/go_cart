@@ -31,7 +31,7 @@ class SharedProduct {
 
   factory SharedProduct.fromMap(Map<String, dynamic> map) {
     return SharedProduct(
-      id: map['id']?.toString() ?? '', // Handle both String and int IDs
+      id: map['id']?.toString() ?? '', 
       name: map['name'] as String,
       imagePath: map['image_path'] as String? ?? '',
       count: map['count'] as int,
@@ -61,10 +61,9 @@ class SharedProduct {
     };
   }
 
-  /// Convert to local Isar Product
  Product toIsarProduct() {
     return Product(
-      sharedId: id, // Use the shared ID directly
+      sharedId: id, 
       name: name,
       imagePath: imagePath,
       count: count,

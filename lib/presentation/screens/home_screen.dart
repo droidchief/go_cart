@@ -11,8 +11,6 @@ import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
 
-/// Enhanced Home Screen with sync indicators and improved UI
-/// Shows product list, sync status, and total calculations
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -89,14 +87,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               },
               tooltip: 'Print Debug Logs',
             ),
-          // Sync status indicator
           const SyncStatusIndicator(),
        
         ],
       ),
       body: BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) {
-          // Handle state changes that need user feedback
           if (state is ProductError) {
             _showErrorSnackBar(context, state);
           } else if (state is ProductSaveSuccess) {
@@ -281,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 Widget? _buildFloatingActionButton() {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 80), // ✅ Add space at bottom
+    padding: const EdgeInsets.only(bottom: 80), 
     child: FloatingActionButton(
       onPressed: () {
         context.read<ProductBloc>().add(

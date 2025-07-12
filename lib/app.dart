@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_cart/config.dart';
-import 'package:go_cart/data/services/enhanced_database_service.dart';
-import 'package:go_cart/data/services/connectivity_service.dart';
+import 'package:go_cart/data/services/database_service.dart';
 import 'package:go_cart/presentation/bloc/product_bloc.dart';
-import 'package:go_cart/presentation/bloc/product_event.dart';
 import 'package:go_cart/presentation/screens/home_screen.dart';
-import 'package:go_cart/utils/permission_helper.dart';
 
 
   class MyApp extends StatelessWidget {
   final AppConfig config;
-  final EnhancedDatabaseService databaseService;
+  final DatabaseService databaseService;
 
   const MyApp({
     super.key,

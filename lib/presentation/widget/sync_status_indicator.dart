@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_state.dart';
 
-/// Widget that shows the current sync status with visual indicators
 class SyncStatusIndicator extends StatelessWidget {
   const SyncStatusIndicator({super.key});
 

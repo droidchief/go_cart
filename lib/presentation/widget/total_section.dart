@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Widget that displays the total amount and item count
 class TotalSection extends StatelessWidget {
   final double totalAmount;
   final int itemCount;
@@ -47,7 +46,7 @@ class TotalSection extends StatelessWidget {
             ],
           ),
           Text(
-            '\₹${totalAmount.toStringAsFixed(2)}',
+            '₹${totalAmount.toStringAsFixed(2)}',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

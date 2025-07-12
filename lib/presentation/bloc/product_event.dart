@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:go_cart/data/models/product.dart';
 
+
 /// Base class for all product-related events
 /// These events trigger state changes in the ProductBloc
 abstract class ProductEvent extends Equatable {
@@ -10,8 +11,7 @@ abstract class ProductEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Event to load all products from local database
-/// Triggered when app starts or when user refreshes the product list
+
 class LoadProducts extends ProductEvent {
   const LoadProducts();
 
@@ -19,13 +19,12 @@ class LoadProducts extends ProductEvent {
   String toString() => 'LoadProducts';
 }
 
-/// Event to update a specific product
-/// Triggered when user changes product details (count, price, etc.)
+
 class UpdateProduct extends ProductEvent {
   final Product product;
-  final String fieldName; // For tracking which field was updated
-  final dynamic oldValue; // For potential undo functionality
-  final dynamic newValue; // For tracking the change
+  final String fieldName; 
+  final dynamic oldValue; 
+  final dynamic newValue; 
 
   const UpdateProduct({
     required this.product,
@@ -41,11 +40,11 @@ class UpdateProduct extends ProductEvent {
   String toString() => 'UpdateProduct { product: ${product.name}, field: $fieldName, oldValue: $oldValue, newValue: $newValue }';
 }
 
-/// Event to update multiple products at once
-/// Useful for batch operations or when syncing from shared database
+
+
 class UpdateProducts extends ProductEvent {
   final List<Product> products;
-  final String reason; // Why this batch update is happening
+  final String reason; 
 
   const UpdateProducts({
     required this.products,
@@ -59,11 +58,11 @@ class UpdateProducts extends ProductEvent {
   String toString() => 'UpdateProducts { count: ${products.length}, reason: $reason }';
 }
 
-/// Event to save all current changes to databases
-/// Triggered when user presses save button
+
+
 class SaveProducts extends ProductEvent {
   final List<Product> products;
-  final bool forceSyncToShared; // Whether to immediately sync to shared DB
+  final bool forceSyncToShared; 
 
   const SaveProducts({
     required this.products,
@@ -77,7 +76,7 @@ class SaveProducts extends ProductEvent {
   String toString() => 'SaveProducts { count: ${products.length}, forceSync: $forceSyncToShared }';
 }
 
-// For saving products (triggered by "Save Changes" button)
+
 class SaveProduct extends ProductEvent {
   final Product product;
   
@@ -87,11 +86,11 @@ class SaveProduct extends ProductEvent {
   List<Object> get props => [product];
 }
 
-/// Event to delete a product
-/// Triggered when user deletes a product (soft delete)
+
+
 class DeleteProduct extends ProductEvent {
   final int productId;
-  final String reason; // Why this product is being deleted
+  final String reason; 
 
   const DeleteProduct({
     required this.productId,
@@ -105,10 +104,10 @@ class DeleteProduct extends ProductEvent {
   String toString() => 'DeleteProduct { productId: $productId, reason: $reason }';
 }
 
-/// Event to force synchronization with shared database
-/// Triggered when user manually requests sync or when app comes online
+
+
 class SyncWithSharedDatabase extends ProductEvent {
-  final bool isManualSync; // Whether user manually triggered this sync
+  final bool isManualSync; 
 
   const SyncWithSharedDatabase({
     this.isManualSync = false,
@@ -121,11 +120,11 @@ class SyncWithSharedDatabase extends ProductEvent {
   String toString() => 'SyncWithSharedDatabase { manual: $isManualSync }';
 }
 
-/// Event triggered when shared database changes are detected
-/// This is fired by the ContentProvider when other instances make changes
+
+
 class SharedDatabaseChanged extends ProductEvent {
   final DateTime timestamp;
-  final String sourceInstance; // Which instance made the change
+  final String sourceInstance; 
 
   const SharedDatabaseChanged({
     required this.timestamp,
@@ -139,10 +138,10 @@ class SharedDatabaseChanged extends ProductEvent {
   String toString() => 'SharedDatabaseChanged { timestamp: $timestamp, source: $sourceInstance }';
 }
 
-/// Event to reset all products to initial state
-/// Useful for testing or clearing all data
+
+
 class ResetProducts extends ProductEvent {
-  final bool keepLocalChanges; // Whether to preserve local modifications
+  final bool keepLocalChanges; 
 
   const ResetProducts({
     this.keepLocalChanges = false,
@@ -155,8 +154,8 @@ class ResetProducts extends ProductEvent {
   String toString() => 'ResetProducts { keepLocal: $keepLocalChanges }';
 }
 
-/// Event to handle connectivity changes
-/// Triggered when device goes online/offline
+
+
 class ConnectivityChanged extends ProductEvent {
   final bool isOnline;
   final DateTime timestamp;
@@ -173,8 +172,8 @@ class ConnectivityChanged extends ProductEvent {
   String toString() => 'ConnectivityChanged { online: $isOnline, timestamp: $timestamp }';
 }
 
-/// Event to add a new product
-/// Triggered when user creates a new product
+
+
 class AddProduct extends ProductEvent {
   final Product product;
 
@@ -189,8 +188,8 @@ class AddProduct extends ProductEvent {
   String toString() => 'AddProduct { product: ${product.name} }';
 }
 
-/// Event to validate product data
-/// Triggered before saving to ensure data integrity
+
+
 class ValidateProducts extends ProductEvent {
   final List<Product> products;
 
@@ -205,7 +204,7 @@ class ValidateProducts extends ProductEvent {
   String toString() => 'ValidateProducts { count: ${products.length} }';
 }
 
-/// Event to print debug logs
+
 class PrintDebugLogs extends ProductEvent {
   const PrintDebugLogs();
   

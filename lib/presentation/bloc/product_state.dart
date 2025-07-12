@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:go_cart/data/models/product.dart';
 
+
 /// Base class for all product-related states
 /// Represents the current state of products in the application
 abstract class ProductState extends Equatable {
@@ -10,7 +11,7 @@ abstract class ProductState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Initial state when ProductBloc is first created
+
 class ProductInitial extends ProductState {
   const ProductInitial();
 
@@ -18,7 +19,7 @@ class ProductInitial extends ProductState {
   String toString() => 'ProductInitial';
 }
 
-/// State when products are being loaded from database
+
 class ProductLoading extends ProductState {
   final String message; 
   final double? progress; 
@@ -35,7 +36,7 @@ class ProductLoading extends ProductState {
   String toString() => 'ProductLoading { message: $message, progress: $progress }';
 }
 
-/// State when products have been successfully loaded
+
 class ProductLoadSuccess extends ProductState {
   final List<Product> products;
   final DateTime lastUpdated; 
@@ -59,7 +60,7 @@ class ProductLoadSuccess extends ProductState {
         .fold(0.0, (sum, product) => sum + (product.pp * product.count));
   }
 
-  /// Create a copy with updated values
+  
   ProductLoadSuccess copyWith({
     List<Product>? products,
     DateTime? lastUpdated,
@@ -86,14 +87,14 @@ class ProductLoadSuccess extends ProductState {
   String toString() => 'ProductLoadSuccess { count: ${products.length}, total: \$${totalAmount.toStringAsFixed(2)}, pending: $hasPendingChanges, instance: $instanceId }';
 }
 
-/// State when there's an error loading or managing products
+
 class ProductError extends ProductState {
   final String message; 
   final String? details; 
   final String errorCode; 
-  final bool isRecoverable; // Whether user can retry
+  final bool isRecoverable; 
   final DateTime timestamp; 
-  final List<Product>? lastKnownProducts; // Fallback data if available
+  final List<Product>? lastKnownProducts; 
 
   const ProductError({
     required this.message,
@@ -111,7 +112,7 @@ class ProductError extends ProductState {
   String toString() => 'ProductError { message: $message, code: $errorCode, recoverable: $isRecoverable, timestamp: $timestamp }';
 }
 
-/// State when products are being saved to database
+
 class ProductSaving extends ProductState {
   final List<Product> products; 
   final String operation; 
@@ -132,7 +133,7 @@ class ProductSaving extends ProductState {
   String toString() => 'ProductSaving { count: ${products.length}, operation: $operation, syncingShared: $isSyncingToShared }';
 }
 
-/// State when products have been successfully saved
+
 class ProductSaveSuccess extends ProductState {
   final List<Product> products;
   final DateTime savedAt;
@@ -155,7 +156,7 @@ class ProductSaveSuccess extends ProductState {
   String toString() => 'ProductSaveSuccess { count: ${products.length}, synced: $syncedToShared, instance: $instanceId }';
 }
 
-/// State when synchronization with shared database is in progress
+
 class ProductSyncing extends ProductState {
   final String operation; 
   final String? sourceInstance; 
@@ -176,14 +177,14 @@ class ProductSyncing extends ProductState {
   String toString() => 'ProductSyncing { operation: $operation, source: $sourceInstance, progress: $progress }';
 }
 
-/// State when synchronization has completed successfully
+
 class ProductSyncSuccess extends ProductState {
   final List<Product> products; 
   final DateTime syncedAt;
   final String instanceId;
   final int itemsSynced; 
   final String message; 
-  final Map<String, dynamic> syncDetails; // Detailed sync information
+  final Map<String, dynamic> syncDetails; 
 
   const ProductSyncSuccess({
     required this.products,
@@ -201,7 +202,7 @@ class ProductSyncSuccess extends ProductState {
   String toString() => 'ProductSyncSuccess { count: ${products.length}, synced: $itemsSynced, instance: $instanceId }';
 }
 
-/// State when validation is being performed on products
+
 class ProductValidating extends ProductState {
   final List<Product> products;
   final String validationType; 
@@ -220,7 +221,7 @@ class ProductValidating extends ProductState {
   String toString() => 'ProductValidating { count: ${products.length}, type: $validationType }';
 }
 
-/// State when product validation has failed
+
 class ProductValidationError extends ProductState {
   final List<Product> products;
   final Map<int, List<String>> validationErrors; 
@@ -239,7 +240,7 @@ class ProductValidationError extends ProductState {
   String toString() => 'ProductValidationError { count: ${products.length}, errors: ${validationErrors.length} }';
 }
 
-/// State when connectivity status changes
+
 class ProductConnectivityChanged extends ProductState {
   final bool isOnline;
   final DateTime timestamp;

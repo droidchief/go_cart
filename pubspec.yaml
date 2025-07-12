@@ -37,6 +37,7 @@ dependencies:
   shared_preferences: ^2.5.3
 
 
+  bloc: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

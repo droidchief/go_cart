@@ -6,12 +6,12 @@ import '../models/shared_product.dart';
 
 /// Service to interact with Android ContentProvider for shared database
 /// This handles all cross-app database operations via ContentProvider
+/// See android/app/src/main/kotlin/com/example/shared_db_provider.kt
 class ContentProviderService {
   static const String _authority = 'com.example.go_cart.shared.database';
   static const String _productsTable = 'products';
   static const MethodChannel _channel = MethodChannel('content_provider_channel');
 
-  /// Initialize the ContentProvider service
   Future<void> init() async {
     if (!Platform.isAndroid) {
       debugPrint('ContentProvider: Only available on Android');
@@ -27,7 +27,6 @@ class ContentProviderService {
     }
   }
 
-  /// Handle method calls from native Android code
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onDataChanged':
@@ -47,7 +46,6 @@ class ContentProviderService {
   /// Stream that emits when shared database data changes
   Stream<void> get onDataChanged => _dataChangeController.stream;
 
-  /// Insert or update a product in the shared database
   Future<bool> insertOrUpdateProduct(SharedProduct product) async {
     if (!Platform.isAndroid) return false;
 
@@ -66,7 +64,6 @@ class ContentProviderService {
     }
   }
 
-  /// Insert or update multiple products in the shared database
   Future<bool> insertOrUpdateProducts(List<SharedProduct> products) async {
     if (!Platform.isAndroid) return false;
 
@@ -87,7 +84,6 @@ class ContentProviderService {
     }
   }
 
-  /// Get all products from the shared database
   Future<List<SharedProduct>> getAllProducts() async {
     if (!Platform.isAndroid) return [];
 
@@ -116,7 +112,6 @@ class ContentProviderService {
     }
   }
 
-  /// Get a specific product by ID from the shared database
   Future<SharedProduct?> getProduct(String id) async {
     if (!Platform.isAndroid) return null;
 
@@ -142,7 +137,6 @@ class ContentProviderService {
     }
   }
 
-  /// Get products updated after a specific timestamp
   Future<List<SharedProduct>> getProductsUpdatedAfter(DateTime timestamp) async {
     if (!Platform.isAndroid) return [];
 
@@ -192,7 +186,6 @@ class ContentProviderService {
     }
   }
 
-  /// Clear all products from the shared database
   Future<bool> clearAllProducts() async {
     if (!Platform.isAndroid) return false;
 
@@ -212,7 +205,6 @@ class ContentProviderService {
     }
   }
 
-  /// Dispose of the service
   void dispose() {
     _dataChangeController.close();
   }

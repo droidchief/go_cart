@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/models/product.dart';
 
-/// Enhanced ProductCard widget with improved UI and sync indicators
-/// Displays product information with editable fields and change tracking
 class ProductCard extends StatefulWidget {
   final Product product;
   final Function(Product) onProductSaved;
@@ -104,14 +102,6 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
-  // void _onFieldChanged() {
-  //   if (!_hasUnsavedChanges) {
-  //     setState(() {
-  //       _hasUnsavedChanges = true;
-  //     });
-  //   }
-  // }
-
   @override
   void didUpdateWidget(ProductCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -152,19 +142,14 @@ class _ProductCardState extends State<ProductCard> {
       ),
       child: Column(
         children: [
-          // Header with product name and sync status
           _buildHeader(),
 
-          // Product image (clickable)
           _buildProductImage(),
 
-          // Editable fields
           _buildEditableFields(),
 
-          // Sub total section
           _buildSubTotalSection(),
 
-          // Save/Cancel buttons (only show when editing)
           if (_isEditing && _hasUnsavedChanges) _buildActionButtons(),
         ],
       ),
@@ -335,9 +320,7 @@ class _ProductCardState extends State<ProductCard> {
       return _buildImagePlaceholder();
     }
 
-    // Check if it's a URL or local file path
     if (_selectedImagePath.startsWith('http')) {
-      // Network image
       return Image.network(
         _selectedImagePath,
         width: double.infinity,
@@ -360,7 +343,6 @@ class _ProductCardState extends State<ProductCard> {
         },
       );
     } else {
-      // Local file
       final file = File(_selectedImagePath);
       if (file.existsSync()) {
         return Image.file(
@@ -431,15 +413,12 @@ class _ProductCardState extends State<ProductCard> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Count field
           _buildCountField(),
           const SizedBox(height: 16),
 
-          // Packaging type field
           _buildPackagingField(),
           const SizedBox(height: 16),
 
-          // MRP and PP fields
           Row(
             children: [
               Expanded(child: _buildMRPField()),
@@ -714,7 +693,6 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  // Helper methods for handling field changes
   void _incrementCount() {
     final currentCount = int.tryParse(_countController.text) ?? 0;
     _countController.text = (currentCount + 1).toString();

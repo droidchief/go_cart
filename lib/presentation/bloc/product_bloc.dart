@@ -3,14 +3,14 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_cart/config.dart';
 import 'package:go_cart/data/models/product.dart';
-import 'package:go_cart/data/services/enhanced_database_service.dart';
+import 'package:go_cart/data/services/database_service.dart';
 import 'product_event.dart';
 import 'product_state.dart';
 
 /// ProductBloc manages the state of products and handles all product-related operations
 /// This includes local storage, shared database synchronization, and UI state management
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  final EnhancedDatabaseService _databaseService;
+  final DatabaseService _databaseService;
   final AppConfig _config;
 
   StreamSubscription<List<Product>>? _productsSubscription;
@@ -22,7 +22,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   static const int _maxSyncRetries = 3;
 
   ProductBloc({
-    required EnhancedDatabaseService databaseService,
+    required DatabaseService databaseService,
     required AppConfig config,
   }) : _databaseService = databaseService,
        _config = config,
@@ -42,7 +42,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ValidateProducts>(_onValidateProducts);
     on<PrintDebugLogs>(_onPrintDebugLogs);
 
-    /// Initialize the bloc and start listening to database changes
     _initializeBloc();
   }
 
@@ -53,7 +52,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
     _startWatchingProducts();
 
-    // Load initial products
     add(const LoadProducts());
   }
 
@@ -76,7 +74,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     );
   }
 
-  /// Load all products from local database
   Future<void> _onLoadProducts(
     LoadProducts event,
     Emitter<ProductState> emit,
@@ -118,7 +115,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///Update a single product
   Future<void> _onUpdateProduct(
     UpdateProduct event,
     Emitter<ProductState> emit,
@@ -128,7 +124,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         'PRODUCT_BLOC: Updating product ${event.product.name} - ${event.fieldName}: ${event.oldValue} -> ${event.newValue}',
       );
 
-      // Update the product in the current list
       final updatedProducts =
           _currentProducts.map((p) {
             return p.id == event.product.id ? event.product : p;
@@ -170,7 +165,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///Update multiple products
   Future<void> _onUpdateProducts(
     UpdateProducts event,
     Emitter<ProductState> emit,
@@ -213,7 +207,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  /// Save a single product (triggered by "Save Changes" button)
   Future<void> _onSaveProduct(
     SaveProduct event,
     Emitter<ProductState> emit,
@@ -229,10 +222,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ),
       );
 
-      // Save product to local database (and sync if online)
       await _databaseService.saveProduct(event.product);
 
-      // Update the product in the current list
       final updatedProducts =
           _currentProducts.map((p) {
             return p.id == event.product.id ? event.product : p;
@@ -257,7 +248,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ),
       );
 
-      // Update the main state with the saved product
       emit(
         ProductLoadSuccess(
           products: updatedProducts,
@@ -286,7 +276,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///Save products to database
   Future<void> _onSaveProducts(
     SaveProducts event,
     Emitter<ProductState> emit,
@@ -304,7 +293,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ),
       );
 
-      // Save products to local database
       await _databaseService.saveProducts(event.products);
       _hasPendingChanges = false;
 
@@ -343,7 +331,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  /// Delete a product
   Future<void> _onDeleteProduct(
     DeleteProduct event,
     Emitter<ProductState> emit,
@@ -355,7 +342,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
       await _databaseService.deleteProduct(event.productId);
 
-      // Remove from current products list
       _currentProducts =
           _currentProducts.where((p) => p.id != event.productId).toList();
 
@@ -390,7 +376,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///Synchronize with shared database
   Future<void> _onSyncWithSharedDatabase(
     SyncWithSharedDatabase event,
     Emitter<ProductState> emit,
@@ -412,11 +397,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
       await _databaseService.forceSyncWithShared();
 
-      // Get updated products after sync
       final updatedProducts = _databaseService.getAllProducts();
       _currentProducts = updatedProducts;
 
-      final totalAmount = ProductLoadSuccess.calculateTotal(updatedProducts);
       final syncStatus = _databaseService.getSyncStatus();
 
       emit(
@@ -519,7 +502,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///  React to online/offline status
   Future<void> _onConnectivityChanged(
     ConnectivityChanged event,
     Emitter<ProductState> emit,
@@ -583,7 +565,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  ///Validate product data
   Future<void> _onValidateProducts(
     ValidateProducts event,
     Emitter<ProductState> emit,
@@ -682,25 +663,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   Future<void> printDebugLogs() async {
-    debugPrint('🐛 ======== PRODUCT BLOC DEBUG LOGS ========');
-    debugPrint('📱 Instance: ${_config.instanceId}');
-    debugPrint('🏗️  Database Initialized: ${_databaseService.isInitialized}');
-    debugPrint('🌐 Online Status: ${_databaseService.isOnline}');
-    debugPrint('📊 Current Products Count: ${_currentProducts.length}');
-    debugPrint('💾 Has Pending Changes: $_hasPendingChanges');
-    debugPrint('🔄 Auto-save Active: ${_autoSaveTimer?.isActive ?? false}');
-
-    debugPrint('\n📋 CURRENT PRODUCTS IN BLOC:');
-    for (int i = 0; i < _currentProducts.length; i++) {
-      final product = _currentProducts[i];
-      debugPrint(
-        '  ${i + 1}. ${product.name} (ID:${product.id}) - v${product.version}',
-      );
-    }
-
-    debugPrint('🐛 ======== END PRODUCT BLOC DEBUG LOGS ========\n');
-
-    // Print database logs
     await _databaseService.printAllLogs();
   }
 

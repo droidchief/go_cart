@@ -21,7 +21,7 @@ class Product {
   late bool isDeleted;
 
   Product({
-    required this.sharedId, // Make required
+    required this.sharedId, 
     required this.name,
     required this.imagePath,
     required this.count,
@@ -60,10 +60,9 @@ class Product {
       updatedBy: updatedBy ?? this.updatedBy,
       version: version ?? this.version,
       isDeleted: isDeleted ?? this.isDeleted,
-    )..id = id ?? this.id; // Allow ID override
+    )..id = id ?? this.id;
   }
 
-  /// Factory constructor to create Product with auto-generated sharedId
   factory Product.create({
     required String name,
     required String imagePath,

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 class ConnectivityService {
   final Connectivity _connectivity = Connectivity();
   
-  /// Enhanced online check with actual network verification
   Future<bool> isOnline() async {
     try {
       final result = await _connectivity.checkConnectivity();
@@ -15,7 +14,6 @@ class ConnectivityService {
       
       if (!hasConnection) return false;
       
-      // Additional verification: try to reach a reliable endpoint
       return await _verifyInternetAccess();
     } catch (e) {
       debugPrint('ConnectivityService: Error checking connectivity: $e');
@@ -35,7 +33,6 @@ class ConnectivityService {
     }
   }
 
-  /// Enhanced connectivity stream with debouncing
   Stream<bool> get onConnectivityChanged {
     return _connectivity.onConnectivityChanged
         .asyncMap((result) async {
@@ -44,7 +41,6 @@ class ConnectivityService {
           
           if (!hasConnection) return false;
           
-          // Verify actual internet access
           return await _verifyInternetAccess();
         })
         .distinct() // Remove duplicate events
@@ -52,7 +48,6 @@ class ConnectivityService {
   }
 }
 
-/// Extension to add debounce functionality
 extension StreamDebounce<T> on Stream<T> {
   Stream<T> debounce(Duration duration) {
     Timer? timer;

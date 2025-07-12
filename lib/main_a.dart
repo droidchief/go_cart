@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_cart/app.dart';
 import 'package:go_cart/config.dart';
-import 'package:go_cart/data/services/enhanced_database_service.dart';
-import 'package:go_cart/data/services/connectivity_service.dart';
-import 'package:go_cart/utils/permission_helper.dart';
-import 'package:isar/isar.dart';
+import 'package:go_cart/data/services/database_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +12,7 @@ Future<void> main() async {
     instanceId: 'instance_a',
   );
 
-  final databaseService = EnhancedDatabaseService(config: config);
+  final databaseService = DatabaseService(config: config);
 
 try {
     await databaseService.init();
